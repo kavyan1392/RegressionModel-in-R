@@ -1,0 +1,405 @@
+---
+title: "DV_CA2"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+
+
+---
+title: "VisualizationCA2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Logistic Regression:
+Logistic regression is similar to linear regression, except that it predicts whether our chosen target variable is true or false, i.e., it is used to predict categorical variable, unlike linear regression model which predicts continuous data.
+Also, instead of fitting a line to the data, logistic regression fits an "S" shaped "logistic function."Although logistic regression tells the probability that the given target variable is true or false, it commonly used for classification.
+For example, if the probability of positive occurrence of an event is above 50 percentage, then it is classified as true. Otherwise, it is classified as false.
+Just like with linear regression, we can make simple models or complicated models(more than one independent variable). It can work with continuous as well as discrete data.
+In logistic regression, we test to see if an independent variable's effect on the prediction is significantly different from 0. If not, it means the variable is not helping the prediction. Various tests are carried out to figure out the significance of a variable in the model.
+It means we can save time and space by eliminating the variable which is not significant for the model.
+Logistic regression's ability to provide probabilities and classify new samples using continuous and discrete measurements makes it a mostly used machine learning method. One big difference between linear and logistic regression is how the line is fit to the data.
+With linear regression, we fit the line using "least square,"i.e., we find the line that minimizes the sum of the squares if these residuals. We also use the residuals to calculate R2 and to compare simple models to complicated models. But logistic regression uses "maximum likelihood" where we pick the probability, scaled by various independent variable, and use that to calculate the likelihood of observing all the instances and lastly multiply all of those likelihoods together. That's the likelihood of the data given the line. Then we shift the line and calculate a new likelihood of the data repeatedly till the curve with the maximum likelihood is selected.
+
+Dataset:
+Introduction
+Attrition means losing employees as well as talent. As employees leave an organization, they take with them much-need skills and qualifications that they develop during his tenure. It is expensive from the company point of view to train the new employee.
+The concern of retaining one's employees happy and satisfied is a sustained and age-old hurdle. If an employee you have invested so much time and money parts for a better opportunity, then this would mean that you would have to spend more time and money to hire somebody else. Therefore with the help of predictive modelings like logistic regression and we see if we can predict employee attrition on this synthetically created IBM dataset.
+
+Research question:
+1. Can we analyse the various factors which lead an employee to turnover using regression model?
+2. Is it work related factors or non-worked related factors with drives employees to quit the job?
+
+The battle with attrition and its implications for productivity and morale is possibly the biggest difficulty that any manager will have to bear. Responses to counteract and to decrease attrition often require the manager to understand the causes and estimate the costs associated with staff turnover.
+
+In his 2009 paper, Yazinski identified 7 main reasons apart from salary that contribute to employee turnover:
+
+1)Employees undergo stress from overwork and have a work/life imbalance.
+2)Least growths and advancement opportunities.
+3)Employees feel the job or workplace is not what they anticipated.
+4)There is no connectivity between the job and person,
+5)There are negligible coaching and feedback.
+6)Employees feel depreciated and unrecognized.
+
+This report is structured as follows:
+
+Exploratory Data Analysis: In this section, we explore the dataset by taking a look at the feature distributions, how correlated is one feature with the other and create visualizations.
+Feature Engineering and Categorical Encoding: Conduct some feature engineering as well as encode all our certain categorical features into a numerical variable.
+Implementing Logistic regression model: We implement a logistic regression Model and analyze the summary.
+
+
+1. Dataset overview.
+
+There are a total of 1,470 observations with 35 variables. 
+
+Target variable is Attrition with 1232 'NO' and 237 'Yes' that explains the unbalance target variable. 
+
+Employee Count is equal 1 for all observation which can not produce useful information for this sample data. In this analysis, we will remove it.
+
+Over 18 is equal to 'Y,' which indicates the employee is not less than 18 years old. This attribute is not necessary for this analysis, hence removing it.
+
+EmployeeNumber is a variable for identifying the specific employee. Which is not significant for this analysis hence removing it.
+
+Standard Hours is equal 80 for all observation. The decision for this attribute is same to Over18 and Employee Count, hence removing it. Business travel, Department, education field, Gender, job role, MaritalStatus, and OverTime are categorical data, and other variables are continues.
+
+Some of the variables are related to the years of working which can be a useful variable for future analysis. Some of the variables are related to personal issues like WorkLifeBalance, RelationshipSatisfaction, JobSatisfaction, EnvironmentSatisfaction, etc.
+
+Some variables are associated with the income like MonthlyIncome, PercentSalaryHike, etc
+
+
+We have to investigate that, how the company objective factors influence attrition employees, and what kind of working environment most will cause employees attrition.
+
+
+
+
+```{r}
+getwd()
+setwd("/Users/sharathsarangmath/Downloads")
+```
+
+```{r}
+#install.packages("mlogit")
+#install.packages("corrplot")
+#install.packages("ggplot2")
+#install.packages("caret")
+#install.packages("corrplot")
+#install.packages("e1071")
+#install.packages("ROCR")
+      
+```
+
+```{r}
+library(ggplot2) # Data Visualization.
+library(corrplot) #visualization of correlation matrix
+library(gridExtra) # Grid Graphics
+library(car) #vif function
+
+```
+
+
+
+```{r}
+attritiondata<-read.csv("Employee-Attrition.csv")
+```
+
+
+```{r}
+str(attritiondata)
+```
+
+
+
+Removing Variable
+
+Some variables are not significant for the analysis since its standard deviation is zero. Those variable are Employee count, Over18, StandardHours. Employee Number. So removing those variables from the data frame.
+
+```{r}
+
+attritdata <- attritiondata[,-c(9,10,22,27)]
+str(attritdata)
+```
+
+```{r}
+# Checking the missing value
+sapply(attritdata, function(x) sum(is.na(x)))
+```
+ 
+Logistic regression Model:
+
+# Model<-glm(outcome~predictor(s), data=dataFrame, family = name of a distribution, na.action = an action)
+
+*family *- is the name of a distribution. Attrition is a binomial variable with 'YES' or 'NO' categories.
+
+*na.action* - optional command for missing values.
+
+Model 1: Logistic regression model including all the 31 variables.
+
+```{r}
+Attritionmodel1<- glm(Attrition ~. , data = attritdata, family='binomial')
+
+```
+```{r}
+summary(Attritionmodel1)
+```
+
+
+
+Deviance statistics (-2LL) is very useful to analyze the fit of the model. Smaller the value of the deviance the better the model and vice-versa.
+
+The summary of the logistic regression model provides two deviance statistics:
+
+->Null deviance* - the deviance of the model that contains no predictors other than the constant (-2LL (baseline))
+
+->The residual= deviance for the model
+
+ From above summary, we can see that there is a considerable difference between Null deviance n=and residual deviance.
+ Null deviance: 1298.58  on 1469  degrees of freedom
+Residual deviance:  859.01  on 1425  degrees of freedom
+
+This can be better accessed using chi-square statistics:
+
+It measures the difference between the model with predictors and without predictors. We can assess the significance of the change in a model by taking the log-likelihood of the new model and subtracting the log-likelihood of the baseline model from it.
+
+the value of the model chi-square statistics works on this principle and =
+
+= -2LL(with Intervention) - (-2LL (with constant)) = (1298.58 - 859.01 = 439.57)
+
+this value has a chi-square distribution, and so you can calculate its statistical significance
+
+
+```{r}
+modelChi1<- Attritionmodel1$null.deviance-Attritionmodel1$deviance
+modelChi1
+```
+The degrees of freedom for the model is stored in the variable df.residual, and for the null model it will be stored in df.null
+
+```{r}
+chidf1<-Attritionmodel1$df.null- Attritionmodel1$df.residual
+chidf1
+```
+The change in df=44 reflects that we have 44 variables in the model.
+
+
+So we can say that the model is predicting whether an employees attempts attrition or not with the help of all the independent variables. 
+
+From the above summary, we can observe that some of the variables are not as significant as others by analyzing the p-value. 
+A detailed exploratory data analysis and few tests are performed below to estimate the most significant variables and to ignore those variables which don't contribute much to the analysis.
+
+
+2. Exploratory data analysis:
+
+i)Attrition VS BusinessTravel
+How frequently an employee goes to business travel.
+
+```{r}
+ggplot(attritdata,aes(BusinessTravel,fill=Attrition))+geom_bar(position=position_dodge())+labs(x="Travel Frequency",y="Count",title="Attrition Vs Business Travel")
+table_travel<-table(attritdata$BusinessTravel, attritdata$Attrition)
+chisq.test(table_travel)
+```
+The barplot shows that employees who travel rarely do not frequently quit the job. Thus, attrition is dependent on business travel, and the chi square test proves this as the p-value is less than alpha(0.05).
+
+ii)Attiriton vs MaritalStatus 
+```{r}
+Marital <- ggplot(attritdata, aes(MaritalStatus,fill = Attrition))
+Marital1 <- Marital + geom_histogram(stat="count")
+print(Marital1)
+table_marital<-table(attritdata$MaritalStatus, attritdata$Attrition)
+chisq.test(table_marital)
+tapply(as.numeric(attritdata$Attrition) - 1 ,attritdata$MaritalStatus,mean)
+```
+From the chi-square test we can see that p-value is 9.456e-11 which is less than 0.05 and marital status is significant fro this analysis. Single personnels have more tendency to be subject to attrition as seen in the tapply test.
+
+iii) Attrition vs JobRole 
+```{r}
+Jobrole <- ggplot(attritdata, aes(JobRole,fill = Attrition))
+Jobrole1 <- Jobrole + geom_histogram(stat="count")
+print(Jobrole1)
+table_jobrole<-table(attritdata$JobRole, attritdata$Attrition)
+chisq.test(table_jobrole)
+```
+From the chi-square test we can see that p-value is 2.752e-15 which is less than 0.05 and marital status is significant fro this analysis.We see that labaratory technican, human resources and sales representative roles have more attrition.
+
+iv) Attrition vs Gender 
+```{r}
+Gender <- ggplot(attritdata, aes(Gender,fill = Attrition))
+Gender1 <- Gender + geom_histogram(stat="count")
+print(Gender1)
+table_gender<-table(attritdata$Gender, attritdata$Attrition)
+chisq.test(table_gender)
+```
+From the chi-square test we can see that p-value is 0.2906 which is more than 0.05 and Gender is significant fro this analysis. Gender variable doesn't have so much significance for this analysis.
+
+
+v) Attrition vs BusinessTravel 
+```{r}
+BusinessTravel <- ggplot(attritdata, aes(BusinessTravel,fill = Attrition))
+BusinessTravel1 <- BusinessTravel + geom_histogram(stat="count")
+print(BusinessTravel1)
+table_BusinessTravel<-table(attritdata$BusinessTravel, attritdata$Attrition)
+chisq.test(table_BusinessTravel)
+```
+From the chi-square test we can see that p-value is 5.609e-06 which is less than 0.05 and BusinessTravel is significant fro this analysis.
+A non-business traveler has little probability of having attrition.
+A business traveler who travels frequently has more likelihood to have attrition.
+
+vi) Plot to understand the effects of Overtime, Age, MaritalStatus of the employees on Attrition
+```{r}
+ggplot(attritdata, aes(OverTime, Age)) +  
+  facet_grid(.~MaritalStatus) +
+  geom_jitter(aes(color = Attrition),alpha = 0.4) +  
+  ggtitle("x=Overtime, y= Age, z = MaritalStatus , t = Attrition") +  
+  theme_light()
+```
+from the above can see that attrition is accumulating in the region where OverTime =Yes & Marial_Status=Single & Age< 35.
+
+Correlation model:
+```{r}
+numeric_mydata <- attritiondata[,c(1,4,6,7,10,11,13,14,15,17,19,20,21,24,25,26,28:35)]
+numeric_Attrition = as.numeric(attritdata$Attrition)- 1
+numeric_mydata = cbind(numeric_mydata, numeric_Attrition)
+str(numeric_mydata)
+library(corrplot)
+M <- cor(numeric_mydata)
+corrplot(M, method="circle")
+```
+
+#Finding how many correlations are bigger than 0.70
+```{r}
+k = 0
+for(i in 1:25){
+for(r in 1:25){
+  if(M[i,r]> 0.70 & i != r){
+    k= k + 1
+  }
+}  }
+print(k/2)
+```
+we can deduce that :
+The most outstanding result is between JobLevel and Monthly income, whose correlation is 0.95.
+the more performance rating, the more Performance salary hike, whose correlation is 0.773
+More the total working hours, the more Job Level, whose correlation is 0.782
+More the total working hours, the more monthlyIncome, whose correlation is 0.772
+the more yearswithcurrmanager, the more yearsatcompany , whose correlation is 0.769
+The more yearsatcompany, the more yearsInCurrentRole , whose correlation is 0.758.
+The more yearswithcurrmanager, the more yearsincurrentrole, whose correlation is 0.71strong text
+
+
+
+Attritionmodel with work-related variable(Professional life)
+
+```{r}
+
+Attritionmodel2 <- glm(Attrition ~ Age+BusinessTravel+DistanceFromHome+JobInvolvement+JobRole+JobSatisfaction+NumCompaniesWorked+OverTime+TotalWorkingYears+TrainingTimesLastYear+YearsAtCompany+YearsInCurrentRole+YearsSinceLastPromotion+YearsWithCurrManager+PercentSalaryHike+PerformanceRating, data = attritdata, family='binomial') 
+```
+
+
+```{r}
+summary(Attritionmodel2)
+```
+Attritionmodel3 with non-work related variables(Personal life)
+```{r}
+
+Attritionmodel3 <- glm(Attrition ~ EnvironmentSatisfaction+Gender+MaritalStatus+RelationshipSatisfaction+WorkLifeBalance, data = attritdata, family='binomial') 
+```
+```{r}
+
+summary(Attritionmodel3) 
+```
+From above summary, we can see that there is a small difference between Null deviance and residual deviance.
+ Null deviance: 1298.58  on 1469  degrees of freedom
+Residual deviance:  1226.5  on 1425  degrees of freedom
+
+This can be better accessed using chi-square statistics:
+
+It measures the difference between the model with predictors and without predictors. We can assess the significance of the change in a model by taking the log-likelihood of the new model and subtracting the log-likelihood of the baseline model from it
+
+the value of the model chi-square statistics works on this principle and =
+
+= -2LL(with Intervention) - (-2LL (with constant)) = (1298.58 - 1226.5 = 72.08)
+
+this value has a chi-square distribution, and so you can calculate its statistical significance.
+
+```{r}
+anova(Attritionmodel3, Attritionmodel2)
+```
+ Anova compares two models and confirms that the difference between the models is 261.73 which means that model2 is better than model1. i.e., work-related variable affects the employees more than non-work related variables. Employees tend to leave the company mainly because of work-related issues.
+
+
+
+
+Validation:
+
+The data is split into testing and trai ning sets. 70 % of the dataset divided into the training set, and rest is used to test the models. 
+
+```{r}
+data1 = sort(sample(nrow(attritdata), nrow(attritdata)*.7))
+train<-attritdata[-data1,]
+test<-attritdata[-data1,]
+```
+```{r}
+attm1=glm(Attrition~.,data=train,family = binomial)
+predictionGlm=predict(attm1,type="response",newdata=test)
+#Confusion matrix is then computed to check the accuracy of the model.
+
+
+table(test$Attrition,predictionGlm>.5)
+```
+     
+```{r}     
+(368+41)/(368+41+25+7)
+
+```
+It is observed that the logistic regression model gives an accuracy of 0.9274376 which is quite decent. It means GLM behaves quite well at predicting which employees might leave the organization. 
+
+```{r}     
+anova(Attritionmodel2,test = 'Chisq')
+
+```
+From the above chi-square anova test, we can tell which work-related variable affects an employee to leave the job most. The top 3 factors are:
+1. OverTime
+2. JobRole
+3. BusinessTravel
+
+```{r}     
+anova(Attritionmodel3,test = 'Chisq')
+
+```
+From the above chi-square ANOVA test, we can tell which non-work related variable affects an employee to leave the job most. The top 3 factors are:
+1. MaritalStatus
+2. EnvironmentSatisfaction
+3. WorkLifeBalance
+
+Conclusion:
+1)After comparing both the models with work-related variables and non-work related variables we can conclude that work-related variable affects the employees more.
+2)From the analysis one of the main factors which drives the employees towards attrition is overtime. It is crucial for any individual to have a balanced work life. Working late hours in the office affects his/her personal life, mental and physical health too.
+3) From the exploratory analysis, it is evident that the employees who are over 35 years and single and works late at the office are more prone to quit the job.
+
+
+References:
+
+http://www.statisticshowto.com/probability-and-statistics/hypothesis-testing/anova/
+
+https://www.kaggle.com/
+
+https://www.qualtrics.com/ie/lp/employee-engagement/?utm_medium=cpc&utm_source=google&utm_campaign=ee+bmm+irl&utm_term=employee+attrition+data&gclid=Cj0KCQjw28_XBRDhARIsAEk21FjcaPTdlf2YN5Q17i8pJHoNs9csC_co8FJLQ643kRooEyxXSMW1IK0aAn-pEALw_wcB
+
+https://www.researchgate.net/publication/259761946_Factors_Affecting_Employee_Retention_A_Comparative_Analysis_of_two_Organizations_from_Heavy_Engineering_Industry
+
+
+
+
+
